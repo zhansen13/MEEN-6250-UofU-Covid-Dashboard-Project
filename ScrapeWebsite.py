@@ -16,7 +16,7 @@ def scrape_country(country,url,day = 'today'):
     print('Scraping finished!')
     print('--------------------')
     identity = 'main_table_countries_' + day  # id of desired contents
-    soup = BeautifulSoup(response, 'lxml')    # parsing the HTML documents using lxml
+    soup = BeautifulSoup(response, 'html.parser')    # parsing the HTML documents using html.parser
     today = soup.find('table', attrs={'id': identity})  # extract the contents that has covid data
     data_today = today.tbody.find_all('tr')  # extract all data from 'tr' subsection
 
@@ -79,6 +79,6 @@ def scrape_country(country,url,day = 'today'):
 if __name__ == '__main__':
     url = 'https://www.worldometers.info/coronavirus/'
     country = 'Turkey'
-    day = 'today'  # valid value of day: 'today'(default)/ 'yesterday'/ 'yesterday2'
+    day = 'today'  # valid inputs of day: 'today'(default)/ 'yesterday'/ 'yesterday2'
     data = scrape_country(country, url, day)
     print(data)
