@@ -5,7 +5,7 @@ Instructions for running the ScrapeWebsite
 -----------------------------------------------------------------
 To run this project, please first install the following packages:
 1. bs4
-2. lxml
+2. html5lib
 3. requests
 4. json
 -----------------------------------------------------------------
