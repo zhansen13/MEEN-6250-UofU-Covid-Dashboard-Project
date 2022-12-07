@@ -15,7 +15,6 @@ output_file('Dashboard.html')
 
 # Collect Data from .json file
 countries = list()
-totalDeathsStr = list()
 totalDeaths = list()
 newDeaths = list()
 for i in range(len(data)-1):
@@ -24,7 +23,6 @@ for i in range(len(data)-1):
         pass
     else:
         countries.append(data[i]['Country,Other'])
-        totalDeathsStr.append(data[i]['TotalDeaths'].replace(',',''))
         totalDeaths.append(int(data[i]['TotalDeaths'].replace(',','')))
         # newDeaths.append(data[i]['NewDeaths'].replace('+','').replace(',',''))
 
@@ -53,4 +51,3 @@ totalDeathsPerCountry.add_tools(HoverTool(tooltips = [("Country", "@y"),("Total 
 
 # Show Results
 show(totalDeathsPerCountry)
-
