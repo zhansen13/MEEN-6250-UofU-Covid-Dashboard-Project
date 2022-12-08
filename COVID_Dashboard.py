@@ -1,6 +1,6 @@
 # Necessary imports
 from math import pi
-from bokeh.layouts import row
+from bokeh.layouts import row, column
 from bokeh.plotting import figure, output_file, show
 from bokeh.models.tools import HoverTool
 from bokeh.transform import cumsum
@@ -242,8 +242,10 @@ def selectChart(chartType, dict_data, day, dataType):
     # Set dynamic height for h_bar figure
     if int(len(countries)/2*100) < 400:
         height_hbar = 400
+        height_pie = 400
     else:
-        height_hbar = int(len(countries)/2*100)
+        height_hbar = int(len(countries)*50)
+        height_pie = int(len(countries)*28)
     # Generate hbar figure
     if chartType == 'hbar':
         # Set figure specifications
@@ -279,7 +281,7 @@ Consider an hbar plot to display more countries."""
             data['angle'] = data['value']/data['value'].sum() * 2*pi
             data['color'] = Category20c[len(dict_data)]
             # Format pie chart
-            chart = figure(height=350, title=title,
+            chart = figure(height=height_pie, title=title,
             tools= "pan, zoom_in, zoom_out, save, reset, hover",
             tooltips=[("Country","@country"),(dataType, "@value")], x_range=(-0.5, 1.0))
             chart.wedge(x=0, y=1, radius=0.4,
@@ -323,20 +325,24 @@ def figureGenerator(day, countries, dataType, chartType):
                 # Show Results
                 return chart
 
-def dashboardGenerator(day1, countries1, dataType1, chartType1):
+def dashboardGenerator(day1, countries1, dataType1, chartType1,
+                       day2, countries2, dataType2, chartType2):
     chart1 = figureGenerator(day1, countries1, dataType1, chartType1)
+    chart2 = figureGenerator(day2, countries2, dataType2, chartType2)
     if type(chart1) == str:
         print(chart1)
+    elif type(chart2) == str:
+        print(chart2)
     else:
-        show(chart1)
+        show(row(chart1, chart2))
+    
     
 
 #countries1 = ['USA','Chile','Mexico','France','Niue']
-#countries2 = ['India','Germany','Brazil','Japan','Italy']
+countries2 = ['India','Germany','Brazil','Japan','Italy']
 countries = ['USA', 'China', 'UK', 'Spain', 'S. Korea', 'Hong Kong','South Africa', 'Italy', 'Japan', 'France', 'Mexico']
 countries3 = ['USA', 'India', 'France', 'Germany', 'Brazil', 'S. Korea', 'Japan', 'Italy', 'UK', 'Russia', 'Turkey', 'Spain', 'Vietnam',
                 'Australia', 'Argentina', 'Netherlands', 'Taiwan', 'Iran', 'Mexico', 'Indonesia']
 
-dashboardGenerator('two_days_ago', countries3, 'TotalCases', 'pie')
-
-
+dashboardGenerator('two_days_ago', countries2, 'TotalCases', 'pie',
+                   'today', allCountries, 'TotalDeaths', 'hbar')
