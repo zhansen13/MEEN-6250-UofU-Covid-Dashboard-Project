@@ -41,6 +41,9 @@ def scrape_country(country,url,day = 'today'):
         data_dic = {}
         for j in range(len(header)):
             data_dic[header[j]] = i[j]
+            if len(data_dic) == 22:
+                data_dic['TotCases/1M pop'] = data_dic['Tot Cases/1M pop']
+                del data_dic['Tot Cases/1M pop']
         data_dic_all.append(data_dic)
     '''
     find out the data of the input country
@@ -54,15 +57,16 @@ def scrape_country(country,url,day = 'today'):
         if i['Country,Other'].upper().replace(' ','').strip() == country.upper().replace(' ','').strip():
             total_num = i['TotalCases']
             country_name = i['Country,Other']
-            total_num_relative = i['Tot Cases/1M pop']
+            #total_num_relative = i['Tot Cases/1M pop']
+            total_num_relative = i['TotCases/1M pop']
             country_data = i
 
     del country_data['#']
-    print(country_name,':')
-    print('Total Cases:',total_num)
-    print('Total Cases / 1M Population:',total_num_relative)
+    # print(country_name,':')
+    # print('Total Cases:',total_num)
+    # print('Total Cases / 1M Population:',total_num_relative)
     '''
-    save the jason file
+    save the json file
     '''
     if day == 'today':
         with open('today.json','w') as f:
@@ -79,6 +83,6 @@ def scrape_country(country,url,day = 'today'):
 if __name__ == '__main__':
     url = 'https://www.worldometers.info/coronavirus/'
     country = 'Turkey'
-    day = 'today'  # valid inputs of day: 'today'(default)/ 'yesterday'/ 'yesterday2'
+    day = 'today'  # valid input of day: 'today'(default)/ 'yesterday'/ 'yesterday2'
     data = scrape_country(country, url, day)
-    print(data)
+    # print(data)
