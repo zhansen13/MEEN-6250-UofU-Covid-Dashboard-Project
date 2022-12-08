@@ -279,8 +279,9 @@ Consider an hbar plot to display more countries."""
             data['angle'] = data['value']/data['value'].sum() * 2*pi
             data['color'] = Category20c[len(dict_data)]
             # Format pie chart
-            chart = figure(height=350, title=title, toolbar_location = None,
-            tools="hover", tooltips=[("Country","@country"),(dataType, "@value")], x_range=(-0.5, 1.0))
+            chart = figure(height=350, title=title,
+            tools= "pan, zoom_in, zoom_out, save, reset, hover",
+            tooltips=[("Country","@country"),(dataType, "@value")], x_range=(-0.5, 1.0))
             chart.wedge(x=0, y=1, radius=0.4,
             start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
             line_color="white", fill_color='color', legend_field='country', source=data)
@@ -336,7 +337,6 @@ countries = ['USA', 'China', 'UK', 'Spain', 'S. Korea', 'Hong Kong','South Afric
 countries3 = ['USA', 'India', 'France', 'Germany', 'Brazil', 'S. Korea', 'Japan', 'Italy', 'UK', 'Russia', 'Turkey', 'Spain', 'Vietnam',
                 'Australia', 'Argentina', 'Netherlands', 'Taiwan', 'Iran', 'Mexico', 'Indonesia']
 
-dashboardGenerator('two_days_ago', countries3, 'TotalCases', 'hbar')
-
+dashboardGenerator('two_days_ago', countries3, 'TotalCases', 'pie')
 
 
