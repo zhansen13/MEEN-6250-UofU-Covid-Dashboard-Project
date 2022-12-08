@@ -4,6 +4,8 @@ from bokeh.models.tools import HoverTool
 from ScrapeWebsite import scrape_country
 import json
 
+
+
 title_today = {'TotalDeaths':'Total COVID Deaths by Country as of Today', 'NewDeaths':'COVID Deaths By Country as of Today',
               'ActiveCases':'Active COVID Cases by Country as of Today', 'Serious,Critical':'Critical COVID Cases by Country as of Today',
               'TotalCases':'Total COVID Cases by Country as of Today', 'NewCases': 'New COVID Cases by Country as of Today',
@@ -90,7 +92,7 @@ def selectChart(chartType, dict_data, day, dataType):
         chart = figure(
             y_range = countries,
             width = 800,
-            height = 200,
+            height = int(len(countries)/2*100),
             title = title,
             x_axis_label = xlabel[dataType],
             tools = "pan, box_select, zoom_in, zoom_out, save, reset"
@@ -121,6 +123,7 @@ def dashboardGenerator(day1, countries1, dataType1, chartType1):
     show(chart1)
 
 countries1 = ['USA','Chile','Mexico','France']
-dashboardGenerator('two_days_ago', countries1, 'TotalCases', 'hbar')
+# countries2 = ['India','Germany','Brazil','Japan','Italy']
+dashboardGenerator('yesterday', countries1, 'NewDeaths', 'hbar')
 
 
