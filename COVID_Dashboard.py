@@ -257,7 +257,7 @@ def selectChart(chartType, dict_data, day, dataType):
         )
         # Render Glyph
         chart.hbar(
-            countries = countries,
+            y = countries,
             right = displayData,
             left = 0,
             height = 0.2,
@@ -265,7 +265,7 @@ def selectChart(chartType, dict_data, day, dataType):
             fill_alpha = 0.5
         )
         # Add Tooltips (HoverTool)
-        chart.add_tools(HoverTool(tooltips = [("Country", "@countries"),(dataType, "@right")]))
+        chart.add_tools(HoverTool(tooltips = [("Country", "@y"),(dataType, "@right")]))
         return chart
     # Generate pie figure
     elif chartType == 'pie':
@@ -288,46 +288,55 @@ Consider an hbar plot to display more countries."""
             chart.axis.visible = False
             chart.grid.grid_line_color = None
             return chart
-
         
-def dashboardGenerator(day1, countries1, dataType1, chartType1):
+def figureGenerator(day, countries, dataType, chartType):
     """_Will generate a COVID dashboard from the specified input arguments_
 
     Args:
-        day1 (_str_): _specify the day to extract the data from. Valid inputs include 'today',
+        day (_str_): _specify the day to extract the data from. Valid inputs include 'today',
             'yesterday', and 'two_days_ago'_
         
-        countries1 (_list_): _list containing countries of interest. Can also use the list variable allCountries. Print
+        countries (_list_): _list containing countries of interest. Can also use the list variable allCountries. Print
         list variable allCountries for a list of valid countries_
         
-        dataType1 (_str_): _Specifies the data type of interest. Print the list variable allDataTypes
+        dataType (_str_): _Specifies the data type of interest. Print the list variable allDataTypes
             for a list of valid inputs for dataType_
         
-        chartType1 (_string_): _specify the type of plot to display. Valid inputs include 'hbar' and 'pie'._
+        chartType (_string_): _specify the type of plot to display. Valid inputs include 'hbar' and 'pie'._
     """
-    jsonData = selectDay(day1)
+    jsonData = selectDay(day)
     if type(jsonData) == str:
         print(jsonData)
     else:
-        allDataType1 = selectDataType(jsonData, dataType1)
-        if type(allDataType1) == str:
-            print(allDataType1)
+        allDataType = selectDataType(jsonData, dataType)
+        if type(allDataType) == str:
+            print(allDataType)
         else:
-            dict_data1 = selectCountryData(allDataType1, dataType1, day1, countries1)
+            dict_data = selectCountryData(allDataType, dataType, day, countries)
             # allDataType2 = selectDataType(dataType2)
-            chart1 = selectChart(chartType1, dict_data1, day1, dataType1)
-            if type(chart1) == str:
-                print(chart1)
+            chart = selectChart(chartType, dict_data, day, dataType)
+            if type(chart) == str:
+                return chart
             else:
                 #chart2 = selectChart('pie')
                 # Show Results
-                show(chart1)
+                return chart
+
+def dashboardGenerator(day1, countries1, dataType1, chartType1):
+    chart1 = figureGenerator(day1, countries1, dataType1, chartType1)
+    if type(chart1) == str:
+        print(chart1)
+    else:
+        show(chart1)
+    
 
 #countries1 = ['USA','Chile','Mexico','France','Niue']
 #countries2 = ['India','Germany','Brazil','Japan','Italy']
 countries = ['USA', 'China', 'UK', 'Spain', 'S. Korea', 'Hong Kong','South Africa', 'Italy', 'Japan', 'France', 'Mexico']
 countries3 = ['USA', 'India', 'France', 'Germany', 'Brazil', 'S. Korea', 'Japan', 'Italy', 'UK', 'Russia', 'Turkey', 'Spain', 'Vietnam',
-                'Australia', 'Argentina', 'Netherlands', 'Taiwan', 'Iran', 'Mexico', 'Indonesia', 'Poland']
+                'Australia', 'Argentina', 'Netherlands', 'Taiwan', 'Iran', 'Mexico', 'Indonesia']
 
-dashboardGenerator('two_days_ago', countries3, 'TotalCases', 'pie')
+dashboardGenerator('two_days_ago', countries3, 'TotalCases', 'hbar')
+
+
 
