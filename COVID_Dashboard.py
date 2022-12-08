@@ -142,8 +142,12 @@ def selectDataType(jsonData, dataType = 'Total Deaths'):
     Args:
         jsonData (_list_): _List of dictionaries including all COVID related data for every country_
         
-        dataType (_str_): _Specifies the data type of interest. Print the list variable allDataTypes
-            for a list of valid inputs for dataType_
+        dataType (_str_ or _list_): _Specifies the data type of interest for the first figure in
+            the COVID dashboard. Print the list variable allDataTypes for a list of valid inputs.
+            NOTE: If chartType == 'circle' then dataType must be a list of two strings where
+            each string specifies a data type from the variable allDataTypes. The first element
+            in the list will be placed on the x axis and the second element in the list will be
+            placed on the y axis_
 
     Returns:
         _dict_: _A dictionary where the keys are all countries and the values contain the data from the
@@ -163,7 +167,7 @@ def selectDataType(jsonData, dataType = 'Total Deaths'):
                 # Clean the string to save as type int
                 allDisplayData.append(int(jsonData[i][dataType].replace('+','').replace(',','')))
         except Exception as e:
-            return f"""Invalid input for the third argument of the dashboardGenerator() function.
+            return f"""Invalid input for the dataType argument of the dashboardGenerator() function.
 No such dataType as {dataType}. Please input exactly one of the values from the following list:
 
     ['TotalDeaths', 'NewDeaths', 'ActiveCases', 'Serious,Critical', 'TotalCases', 'NewCases',
@@ -182,8 +186,12 @@ def selectCountryData(allDataType, dataType, day, countries = 'all'):
         allDataType (_dict_): _dictionary where the keys are all of the countries and the values contain
             the specific data type of interest_
         
-        dataType (_str_): _Specifies the data type of interest. Print the list variable allDataTypes
-            for a list of valid inputs for dataType_
+        dataType (_str_ or _list_): _Specifies the data type of interest for the first figure in
+            the COVID dashboard. Print the list variable allDataTypes for a list of valid inputs.
+            NOTE: If chartType == 'circle' then dataType must be a list of two strings where
+            each string specifies a data type from the variable allDataTypes. The first element
+            in the list will be placed on the x axis and the second element in the list will be
+            placed on the y axis_
         
         day (_str_): _Specify the day of interest. Valid inputs are 'today', 'yesterday', and 'two_days_ago'_
         
@@ -223,8 +231,12 @@ def selectChart(chartType, dict_data, day, dataType):
         day (_int_): _specify the day to extract the data from. Valid inputs include 'today',
             'yesterday', and 'two_days_ago'_
         
-        dataType (_str_): _Specifies the data type of interest. Print the list variable allDataTypes
-            for a list of valid inputs for dataType_
+        dataType (_str_ or _list_): _Specifies the data type of interest for the first figure in
+            the COVID dashboard. Print the list variable allDataTypes for a list of valid inputs.
+            NOTE: If chartType == 'circle' then dataType must be a list of two strings where
+            each string specifies a data type from the variable allDataTypes. The first element
+            in the list will be placed on the x axis and the second element in the list will be
+            placed on the y axis_
 
     Returns:
         _bokeh.plotting._figure.figure_: _returns a figure assignment. Use show() to generate the figure_
@@ -255,7 +267,7 @@ def selectChart(chartType, dict_data, day, dataType):
             height = height_hbar,
             title = title,
             x_axis_label = xlabel[dataType],
-            tools = "pan, box_select, zoom_in, zoom_out, save, reset"
+            tools = "pan, wheel_zoom, box_zoom, save, reset"
         )
         # Render Glyph
         chart.hbar(
@@ -282,7 +294,7 @@ Consider an hbar plot to display more countries."""
             data['color'] = Category20c[len(dict_data)]
             # Format pie chart
             chart = figure(height=height_pie, title=title,
-            tools= "pan, zoom_in, zoom_out, save, reset, hover",
+            tools= "pan, wheel_zoom, box_zoom, save, reset, hover",
             tooltips=[("Country","@country"),(dataType, "@value")], x_range=(-0.5, 1.0))
             chart.wedge(x=0, y=1, radius=0.4,
             start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
@@ -293,48 +305,74 @@ Consider an hbar plot to display more countries."""
             return chart
         
 def figureGenerator(day, countries, dataType, chartType):
-    """_Will generate a COVID dashboard from the specified input arguments_
+    """_Will generate a figure for the COVID dashboard from the specified input arguments_
 
     Args:
         day (_str_): _specify the day to extract the data from. Valid inputs include 'today',
             'yesterday', and 'two_days_ago'_
         
-        countries (_list_): _list containing countries of interest. Can also use the list variable allCountries. Print
-        list variable allCountries for a list of valid countries_
+        countries (_list_): _list containing countries of interest. Can also use the list
+            variable allCountries. Print list variable allCountries for a list of valid countries_
         
-        dataType (_str_): _Specifies the data type of interest. Print the list variable allDataTypes
-            for a list of valid inputs for dataType_
+        dataType (_str_ or _list_): _Specifies the data type of interest for the first figure in
+            the COVID dashboard. Print the list variable allDataTypes for a list of valid inputs.
+            NOTE: If chartType == 'circle' then dataType must be a list of two strings where
+            each string specifies a data type from the variable allDataTypes. The first element
+            in the list will be placed on the x axis and the second element in the list will be
+            placed on the y axis_
         
-        chartType (_string_): _specify the type of plot to display. Valid inputs include 'hbar' and 'pie'._
+        chartType (_string_): _specify the type of plot to display. Valid inputs include 'hbar',
+            'pie', and 'circle'_
     """
+    # Call each of the applicable functions in order to generate a figure for the COVID dashboard
     jsonData = selectDay(day)
+    # Perform check to see if day was input correctly
     if type(jsonData) == str:
-        print(jsonData)
+        # Return an error message if day was input incorrectly
+        return jsonData
     else:
         allDataType = selectDataType(jsonData, dataType)
+        # Perform a check to see if dataType was input correctly
         if type(allDataType) == str:
-            print(allDataType)
+            # Return an error message if dataType was input incorrectly
+            return allDataType
         else:
             dict_data = selectCountryData(allDataType, dataType, day, countries)
-            # allDataType2 = selectDataType(dataType2)
             chart = selectChart(chartType, dict_data, day, dataType)
-            if type(chart) == str:
-                return chart
-            else:
-                #chart2 = selectChart('pie')
-                # Show Results
-                return chart
+            return chart
 
-def dashboardGenerator(day1, countries1, dataType1, chartType1,
-                       day2, countries2, dataType2, chartType2):
-    chart1 = figureGenerator(day1, countries1, dataType1, chartType1)
-    chart2 = figureGenerator(day2, countries2, dataType2, chartType2)
-    if type(chart1) == str:
-        print(chart1)
-    elif type(chart2) == str:
-        print(chart2)
-    else:
-        show(row(chart1, chart2))
+def dashboardGenerator(input_list):
+    """_Will generate a dashboard from the specified input arguments regarding COVID data_
+
+    Args:
+        input_list (_list_): _input_list must be entered as a list of lists. Each sublist
+            represents a figure to be displayed on the COVID Dashboard. Each sublist must contain
+            exactly 4 elements in the following format [day, countries, dataType, chartType].
+            Each variable within the sublist must represent the following arguments in order:
+        
+                day (_str_): _specify the day to extract the data from for the first figure in the 
+                    COVID dashboard. Valid inputs include 'today', 'yesterday', and 'two_days_ago'_
+        
+                countries (_list_): _list containing countries of interest for the first figure in the
+                    COVID dashboard. Can also use the list type variable allCountries. Print list variable
+                    allCountries for a list of valid countries_
+        
+                dataType (_str_ or _list_): _Specifies the data type of interest for the first figure in
+                    the COVID dashboard. Print the list variable allDataTypes for a list of valid inputs.
+                    NOTE: If chartType == 'circle' then dataType must be a list of two strings where
+                    each string specifies a data type from the variable allDataTypes. The first element
+                    in the list will be placed on the x axis and the second element in the list will be
+                    placed on the y axis_
+        
+                chartType (_str_): _specify the type of plot to display for the first figure in the
+                    COVID dashboard. Valid inputs include 'hbar', 'pie', and 'circle_
+    """
+    chart = list()
+    for i in range(len(input_list)):
+        chart.append(figureGenerator(input_list[i][0], input_list[i][1], input_list[i][2], input_list[i][3]))
+        if type(chart[i]) == str:
+            return chart[i]
+    show(row(chart))
     
     
 
@@ -344,5 +382,5 @@ countries = ['USA', 'China', 'UK', 'Spain', 'S. Korea', 'Hong Kong','South Afric
 countries3 = ['USA', 'India', 'France', 'Germany', 'Brazil', 'S. Korea', 'Japan', 'Italy', 'UK', 'Russia', 'Turkey', 'Spain', 'Vietnam',
                 'Australia', 'Argentina', 'Netherlands', 'Taiwan', 'Iran', 'Mexico', 'Indonesia']
 
-dashboardGenerator('two_days_ago', countries2, 'TotalCases', 'pie',
-                   'today', allCountries, 'TotalDeaths', 'hbar')
+dashboardGenerator([['two_days_ago', countries2, 'TotalCases',  'pie'],
+                    ['today',        countries3, 'TotalDeaths', 'hbar']])
