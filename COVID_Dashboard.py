@@ -195,15 +195,20 @@ def selectCountryData(allDataType, dataType, day, countries = 'all'):
     """
     # Extract only the values from the master list that correspond to the countries of interest
     values = list()
+    errors = list()
     for i in range(len(countries)):
-        # If no data is available for a county of interest, print an error statement and skip that country.
+        # If no data is available for a county of interest, print an error statement.
         try:
             values.append(allDataType[countries[i]])
         except Exception as e:
             values.append('No Data Available')
             print(f"Unfortunately the {xlabel[dataType]} data for {countries[i]} is not available for {day.replace('_',' ')}.")
+            errors.append(i)
     # Combine the countries of interest with the values of interest in a dictionary.
     dict_data = dict(zip(countries, values))
+    # Remove any countries that have error statements.
+    for i in range(len(errors)):
+        del dict_data[countries[errors[i]]]
     return dict_data
 
 def selectChart(chartType, dict_data, day, dataType):
@@ -224,19 +229,22 @@ def selectChart(chartType, dict_data, day, dataType):
     Returns:
         _bokeh.plotting._figure.figure_: _returns a figure assignment. Use show() to generate the figure_
     """
+    # Seperate dict_data keys and values into seperate lists
+    countries = list(dict_data.keys())
+    displayData = list(dict_data.values())
+    # Set chart title based on day and dataType
     if day == 'today':
         title = title_today[dataType]
     elif day == 'yesterday':
         title = title_yesterday[dataType]
     elif day == 'two_days_ago':
         title = title_two_days_ago[dataType]
-    countries = list(dict_data.keys())
-    displayData = list(dict_data.values())
+    # Set dynamic height for h_bar figure
     if int(len(countries)/2*100) < 400:
         height_hbar = 400
     else:
         height_hbar = int(len(countries)/2*100)
-        
+    # Generate hbar figure
     if chartType == 'hbar':
         # Set figure specifications
         chart = figure(
@@ -259,22 +267,27 @@ def selectChart(chartType, dict_data, day, dataType):
         # Add Tooltips (HoverTool)
         chart.add_tools(HoverTool(tooltips = [("Country", "@countries"),(dataType, "@right")]))
         return chart
+    # Generate pie figure
     elif chartType == 'pie':
-        data = pd.Series(dict_data).reset_index(name='value').rename(columns={'index': 'country'})
-        data['angle'] = data['value']/data['value'].sum() * 2*pi
-        data['color'] = Category20c[len(dict_data)]
-
-        chart = figure(height=350, title=title, toolbar_location = None,
-        tools="hover", tooltips=[("Country","@country"),(dataType, "@value")], x_range=(-0.5, 1.0))
-
-        chart.wedge(x=0, y=1, radius=0.4,
-        start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
-        line_color="white", fill_color='color', legend_field='country', source=data)
-
-        chart.axis.axis_label = None
-        chart.axis.visible = False
-        chart.grid.grid_line_color = None
-        return chart
+        # Return error if more than 20 countries
+        if len(dict_data) > 20:
+            return f"""Maximum number of countries exceded. Length of input countries list is limited to 20 for chartType pie.
+Consider an hbar plot to display more countries."""
+        else:
+            # Format data using pandas
+            data = pd.Series(dict_data).reset_index(name='value').rename(columns={'index': 'country'})
+            data['angle'] = data['value']/data['value'].sum() * 2*pi
+            data['color'] = Category20c[len(dict_data)]
+            # Format pie chart
+            chart = figure(height=350, title=title, toolbar_location = None,
+            tools="hover", tooltips=[("Country","@country"),(dataType, "@value")], x_range=(-0.5, 1.0))
+            chart.wedge(x=0, y=1, radius=0.4,
+            start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
+            line_color="white", fill_color='color', legend_field='country', source=data)
+            chart.axis.axis_label = None
+            chart.axis.visible = False
+            chart.grid.grid_line_color = None
+            return chart
 
         
 def dashboardGenerator(day1, countries1, dataType1, chartType1):
@@ -290,7 +303,7 @@ def dashboardGenerator(day1, countries1, dataType1, chartType1):
         dataType1 (_str_): _Specifies the data type of interest. Print the list variable allDataTypes
             for a list of valid inputs for dataType_
         
-        chartType1 (_type_): _description_
+        chartType1 (_string_): _specify the type of plot to display. Valid inputs include 'hbar' and 'pie'._
     """
     jsonData = selectDay(day1)
     if type(jsonData) == str:
@@ -301,14 +314,20 @@ def dashboardGenerator(day1, countries1, dataType1, chartType1):
             print(allDataType1)
         else:
             dict_data1 = selectCountryData(allDataType1, dataType1, day1, countries1)
-
             # allDataType2 = selectDataType(dataType2)
             chart1 = selectChart(chartType1, dict_data1, day1, dataType1)
-            #chart2 = selectChart('pie')
-            # Show Results
-            show(chart1)
+            if type(chart1) == str:
+                print(chart1)
+            else:
+                #chart2 = selectChart('pie')
+                # Show Results
+                show(chart1)
 
 #countries1 = ['USA','Chile','Mexico','France','Niue']
 #countries2 = ['India','Germany','Brazil','Japan','Italy']
 countries = ['USA', 'China', 'UK', 'Spain', 'S. Korea', 'Hong Kong','South Africa', 'Italy', 'Japan', 'France', 'Mexico']
-dashboardGenerator('two_days_ago', countries, 'TotCases/1M pop', 'pie')
+countries3 = ['USA', 'India', 'France', 'Germany', 'Brazil', 'S. Korea', 'Japan', 'Italy', 'UK', 'Russia', 'Turkey', 'Spain', 'Vietnam',
+                'Australia', 'Argentina', 'Netherlands', 'Taiwan', 'Iran', 'Mexico', 'Indonesia', 'Poland']
+
+dashboardGenerator('two_days_ago', countries3, 'TotalCases', 'pie')
+
