@@ -8,7 +8,7 @@ from bokeh.transform import cumsum,linear_cmap
 from bokeh.palettes import Category20c,Turbo256
 from bokeh.io import curdoc
 from ScrapeWebsite import scrape_country
-from bokeh.models import CustomJS, MultiSelect, ColumnDataSource, RadioButtonGroup, BuiltinIcon, Button, SetValue
+from bokeh.models import CustomJS, MultiSelect, ColumnDataSource, RadioButtonGroup, BuiltinIcon, Button, SetValue, Div
 import pandas as pd
 import json
 from NameSort import NameSort
@@ -103,6 +103,7 @@ xlabel = {'TotalDeaths':'Total Deaths', 'NewDeaths':'New Deaths',
 
 allDataTypes = list(xlabel.keys())
 
+# Select Day pulls the needed JSON data from today, yesterday, or two days ago
 def selectDay(day = 'today'):
     """_Retrieves COVID data from a .json file corresponding to the day input argument and stores it as a
             list of dictionaries. Also initaites an output .html file named Dashboard.html_
@@ -139,6 +140,7 @@ todayJSON = selectDay('today')
 yesterdayJSON = selectDay('yesterday')
 yesterday2JSON = selectDay('yesterday2')
 
+# Select Data Type pulls the needed JSON data and puts into a dictionary organized by country the value of the specified data type.
 def selectDataType(jsonData, dataType = 'Total Deaths'):
     """_Extract full list of countries and corresponding data type values from jsonData_
 
@@ -188,9 +190,6 @@ tTotDeath = selectDataType(todayJSON,'TotalDeaths')
 yTotDeath = selectDataType(yesterdayJSON,'TotalDeaths')
 y2TotDeath = selectDataType(yesterday2JSON,'TotalDeaths')
 
-#print(y2TotDeath)
-#print(tTotDeath)
-
 # Death per 1m population
 tDeaths = selectDataType(todayJSON,'Deaths/1M pop')
 yDeaths = selectDataType(yesterdayJSON,'Deaths/1M pop')
@@ -201,8 +200,8 @@ tCases = selectDataType(todayJSON,'TotalCases')
 yCases = selectDataType(yesterdayJSON,'TotalCases')
 y2Cases = selectDataType(yesterday2JSON,'TotalCases')
 
-#print(tCases)
 
+#Get Data specific to desired countries
 def selectCountryData(allDataType, dataType, day, countries = 'all'):
     """_Extracts only data corresponding to countries of interest_
 
@@ -248,34 +247,36 @@ defaultCountries = ['USA', 'India', 'France', 'Germany', 'Brazil', 'S. Korea', '
                 'Australia', 'Argentina', 'Netherlands', 'Taiwan', 'Iran', 'Mexico', 'Indonesia']
 
 
+#Pull total death and total case data for the default country values
 tTDFilt = selectCountryData(tTotDeath, 'TotalDeaths','today',defaultCountries)
 tCFilt = selectCountryData(tCases,'TotalCases','today', defaultCountries)
-print(tCFilt)
 
+#Pull the values from the filtered total death and total case values and put them in a list to create a data dictionary to provide to the figure generators
 countries = list(tTDFilt.keys())
 TDvalues = list(tTDFilt.values())
 tCValues = list(tCFilt.values())
-print(tCValues)
 
-   
+
+#Define opti0ns for bar graph colors to use in update() function later
+TDColors = ['blue' for x in range(len(TDvalues))]   
+
+#Total death data dictionary
 TDdata = dict(x = TDvalues,
             y = countries,
-            )  
+            color = TDColors)  
 
-#print(tTDFiltdata)
-radii = [x/max(tCValues)*2 for x in tCValues]
 #Define Color mapping for circles: 
-#mapper = linear_cmap(field_name='Total Deaths', palette = Turbo256, low=min(TCTDdata['y']), high=max(TCTDdata['y']))
-colors = ["#%02x%02x%02x" % (255, int(round(value * 255 / max(tCValues))), 255) for value in tCValues]
+colors = linear_cmap(field_name="y", palette = Turbo256, low=min(TDvalues), high=max(TDvalues))
 
+
+#Define data dictionary for total cases and total deaths plot
 TCTDdata = dict(x = tCValues,
                 y = TDvalues,
                 countries = countries,
-                color = colors)
+                )
 
+#Define sources for each of the plots
 TCTDsource = ColumnDataSource(data = TCTDdata)
-
-
 TDsource = ColumnDataSource(data=TDdata)
 
 
@@ -289,13 +290,13 @@ TDp = figure(
     tools = "pan, wheel_zoom, box_zoom, save, reset",
 )
 
-#Render Glyph
+#Render Total Deaths Glyph
 TDp.hbar(
     y = 'y',
     right = 'x',
     left = 0,
     height = 0.2,
-    color = 'blue',
+    color = 'color',
     fill_alpha = 0.5,
     source = TDsource,
 )
@@ -315,12 +316,12 @@ TDvTCp = figure(
     tooltips = [("Country","@countries"),('Total Cases','@x'),('Total Deaths','@y')],
 )
 
-#Create Glyph 
+#Create Total death and total cases Glyph 
 TDvTCp.circle(
     x = 'x',
     y = 'y',
     size = 10,
-    fill_color = 'blue',
+    fill_color = colors,
     line_color = "lightgrey",
     fill_alpha = 0.6,
     source = TCTDsource,    
@@ -334,11 +335,6 @@ OPTIONS = []
 for i in range(len(Countries_sorted)-1):
     OPTIONS.append(tuple((f'{i}',Countries_sorted[i])))
 
-#print(OPTIONS)
-
-
-#['USA', 'India', 'France', 'Germany', 'Brazil', 'S. Korea', 'Japan', 'Italy', 'UK', 'Russia', 'Turkey', 'Spain', 'Vietnam',
-#                'Australia', 'Argentina', 'Netherlands', 'Taiwan', 'Iran', 'Mexico', 'Indonesia']
 
 # Create Input options for the chart.
 multi_select = MultiSelect(title = "Countries:",
@@ -355,6 +351,12 @@ date_select = RadioButtonGroup(labels=DateLabels,active=0)
 #Button for updating all data
 UpdateData = Button(label='Update Data', button_type = 'primary')
 
+#Title for Dash board and instructions
+
+div1 = Div(text="""<b>COVID Dashboard<b>""",width = 800, height = 100, styles = {'font-size': '400%', 'color': 'blue'})
+div2 = Div(text="""This dashboard presents total death rates and total cases for the last 3 days by country. 
+           Using the list of countries, you can display as many countries as you are interested in using CTRL+Click. To ensure the most up-to-date data, press the update button above.
+           The data for this site is sourced from <a href="https://www.worldometers.info/coronavirus/">Worldometer</a>""", width = 800, height = 100)
 
 # Define Dynamic Update Behavior
 def update():
@@ -368,14 +370,17 @@ def update():
         day = 'today'
         inputData = tTotDeath
         inputData2 = tCases
+        colorBar = 'blue'
     if dateActive == 1:
         day = 'yesterday'
         inputData = yTotDeath
         inputData2 = yCases
+        colorBar = 'red'
     if dateActive == 2:
         day = 'yesterday2'
         inputData = y2TotDeath
         inputData2 = y2Cases
+        colorBar = 'orange'
     
     TDFilt = selectCountryData(inputData, 'TotalDeaths', day, countries)
     tCFilt = selectCountryData(inputData2,'TotalCases', day, countries)
@@ -384,8 +389,11 @@ def update():
     TotDeath = list(TDFilt.values())
     TotCase = list(tCFilt.values())
     
+    TDColor = [colorBar for x in range(len(TDvalues))]
+    
     TDdata = dict(x = TotDeath,
-            y = TDcountries,) 
+            y = TDcountries,
+            color = TDColor) 
     
     TDsource.data = TDdata
     TDp.y_range.factors = list(TDdata['y'])
@@ -412,18 +420,25 @@ def ButtonUpdate():
     yesterdayJSON = selectDay('yesterday')
     yesterday2JSON = selectDay('yesterday2')
     
+    #Total Death data 
+    tTotDeath = selectDataType(todayJSON,'TotalDeaths')
+    yTotDeath = selectDataType(yesterdayJSON,'TotalDeaths')
+    y2TotDeath = selectDataType(yesterday2JSON,'TotalDeaths')
     
+    # Total Cases 
+    tCases = selectDataType(todayJSON,'TotalCases')
+    yCases = selectDataType(yesterdayJSON,'TotalCases')
+    y2Cases = selectDataType(yesterday2JSON,'TotalCases')
     
+    update()
     
- 
-    
+#Define widget behaviors based on change and click actions    
 multi_select.on_change('value', lambda attr, old, new: update())
 date_select.on_change('active', lambda attr,old, new: update())
-#UpdateData.on_click(
+UpdateData.on_click(ButtonUpdate)
+
 update()
 
-curdoc().add_root(column(row(date_select),row(TDp,multi_select,TDvTCp)))
-
-
-
+#Run layout for bokeh server
+curdoc().add_root(column(row(div1,UpdateData),row(div2),row(date_select),row(TDp,multi_select,TDvTCp)))
 
