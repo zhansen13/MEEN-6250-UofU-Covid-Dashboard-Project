@@ -29,7 +29,7 @@ The COVID Dashboard App runs from the COVIDDashboardApp.py and is designed to be
 2. Extract all files into a folder of your choice. 
 3. Launch dashboard using command - bokeh serve --show COVIDDashboardApp.py <br>
 	3.1 You can launch the dashboard directly from folder location by opening a command window and entering bokeh serve --show COVIDDashboardApp.py <br>
-	3.2 If you are running the code in and VSCode, enter command - bokeh serve --show COVIDDashboardApp.py in the terminal <br>
+	3.2 If you are running the code in VSCode, enter command - bokeh serve --show COVIDDashboardApp.py in the terminal <br>
 
 NOTE: The JSON files included in the repository are not guranteed to be up to date. Upon launching the dashboard in the server, click the update data button 	to pull the most recent three days of data from Worldometer. 
 	
