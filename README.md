@@ -24,15 +24,18 @@ Instructions for running the ScrapeWebsite
 Instructions for running the COVIDDashboardApp in Bokeh Server
 -----------------------------------------------------------------
 The COVID Dashboard App runs from the COVIDDashboardApp.py and is designed to be run on a local bokeh server. To successfully launch and utilize the COVID dashboard do the following:
-	1. Download the file repository into a zip file. 
-	2. Extract all files into a folder of your choice. 
-	3. Launch dashboard using command - bokeh serve --show COVIDDashboardApp.py
-		Option 1: You can launch the dashboard directly from folder location by opening a command window and entering bokeh serve --show COVIDDashboardApp.py
-		Option 2: If you are running the code in and VSCode, enter command - bokeh serve --show COVIDDashboardApp.py in the terminal
-	NOTE: The JSON files included in the repository are not guranteed to be up to date. Upon launching the dashboard in ther server, click the update data button 		to pull the most recent three days of data from Worldometer. 
+
+1. Download the file repository into a zip file. 
+2. Extract all files into a folder of your choice. 
+3. Launch dashboard using command - bokeh serve --show COVIDDashboardApp.py
+	3.1: You can launch the dashboard directly from folder location by opening a command window and entering bokeh serve --show COVIDDashboardApp.py
+	3.2: If you are running the code in and VSCode, enter command - bokeh serve --show COVIDDashboardApp.py in the terminal
+
+NOTE: The JSON files included in the repository are not guranteed to be up to date. Upon launching the dashboard in the server, click the update data button 	to pull the most recent three days of data from Worldometer. 
 	
 Following these steps should launch the dashboard in your browser and will be ready for user interaction. 
 
 Interaction Options Available to User: 
-	1.Toggle between which day of data to display from the 3 available days of data from JSON files.
-	2. Select which and how many countries to display data for. 
+
+1. Toggle between which day of data to display from the 3 available days of data from JSON files.
+2. Select which and how many countries to display data for. 
